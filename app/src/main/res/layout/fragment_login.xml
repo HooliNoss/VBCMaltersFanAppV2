@@ -1,0 +1,41 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.magmail.stefan.bachmann.vbcmaltersfanappv3.LoginFragment">
+
+    <RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical"
+        android:background="@android:color/white"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp">
+
+            <TextView
+                android:id="@+id/txtLoginTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textColor="@android:color/black"
+                android:paddingTop="10dp"/>
+
+            <TextView
+                android:id="@+id/txtLoginInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/txtLoginTitle"
+                android:text=""
+                android:textColor="@android:color/black"
+                android:paddingTop="10dp"/>
+
+            <Button
+                android:id="@+id/btnLoginSubmit"
+                android:layout_width="wrap_content"
+                android:minWidth="100dp"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:layout_below="@+id/txtLoginInfo"/>
+
+        </RelativeLayout>
+</FrameLayout>

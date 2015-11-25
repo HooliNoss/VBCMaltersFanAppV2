@@ -1,0 +1,35 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_first_fragment"
+            android:icon="@drawable/ic_one"
+            android:title="News"
+            android:checked="true"/>
+        <item
+            android:id="@+id/nav_second_fragment"
+            android:icon="@drawable/ic_two"
+            android:title="Rangliste" />
+        <item
+            android:id="@+id/nav_third_fragment"
+            android:icon="@drawable/ic_three"
+            android:title="Spielpläne" />
+
+
+    </group>
+
+    <item android:title="Erweitert">
+        <menu>
+            <item
+                android:id="@+id/nav_properties_fragment"
+                android:icon="@drawable/ic_one"
+                android:title="Einstellungen" />
+            <item
+                android:id="@+id/nav_login_fragment"
+                android:icon="@drawable/ic_two"
+                android:title="Login" />
+        </menu>
+    </item>
+
+
+</menu>
