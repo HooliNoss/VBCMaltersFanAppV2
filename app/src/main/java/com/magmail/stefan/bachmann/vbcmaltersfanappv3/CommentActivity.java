@@ -3,8 +3,11 @@ package com.magmail.stefan.bachmann.vbcmaltersfanappv3;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -43,10 +46,14 @@ public class CommentActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
-
     private TextView txtTitle;
     private TextView txtDate;
     private TextView txtBody;
+    private int mNewsId;
+    private boolean mIsAdmin;
+    private boolean mIsAuthor;
+
+    private FloatingActionButton mFabComment;
 
 
     @Override
@@ -65,7 +72,10 @@ public class CommentActivity extends AppCompatActivity {
         txtDate = (TextView) findViewById(R.id.txt_date_original_comment);
         txtBody = (TextView) findViewById(R.id.txt_body_original_comment);
 
-        int newsId = getIntent().getIntExtra("newsId", 0);
+        mFabComment = (FloatingActionButton) findViewById(R.id.fab_comments);
+        mFabComment.setOnClickListener(fabCommentOnClickListener);
+
+        mNewsId = getIntent().getIntExtra("newsId", 0);
         String title = getIntent().getStringExtra("title");
         String date = getIntent().getStringExtra("date");
         String body = getIntent().getStringExtra("body");
@@ -74,8 +84,10 @@ public class CommentActivity extends AppCompatActivity {
         txtDate.setText(date);
         txtBody.setText(body);
 
+        checkPermissions();
+
         parser = new XMLParser();
-        getComments(newsId);
+        getComments(mNewsId);
     }
 
     private void getComments(int newsId)
@@ -104,6 +116,7 @@ public class CommentActivity extends AppCompatActivity {
                             Element e = (Element) nl.item(i);
 
                             Comment comment = new Comment();
+                            comment.setId(Integer.parseInt(parser.getValue(e, "CommentID").toString()));
                             comment.setAuthor(parser.getValue(e, "CommentCreator"));
 
                             String date = parser.getValue(e, "CommentDate");
@@ -115,7 +128,7 @@ public class CommentActivity extends AppCompatActivity {
                         }
 
                         Comment[] myDataset = commentList.toArray(new Comment[commentList.size()]);
-                        mAdapter = new CommentAdapter(CommentActivity.this, myDataset);
+                        mAdapter = new CommentAdapter(CommentActivity.this, myDataset, mIsAdmin);
                         mRecyclerView.setAdapter(mAdapter);
                     }
                 }, new Response.ErrorListener() {
@@ -137,5 +150,20 @@ public class CommentActivity extends AppCompatActivity {
             }
         });
         queue.add(stringRequest);
+    }
+
+    private View.OnClickListener fabCommentOnClickListener = new View.OnClickListener() {
+        public void onClick(View v) {
+            Intent intent = new Intent(CommentActivity.this, AddCommentActivity.class);
+            intent.putExtra("newsId", mNewsId);
+            startActivity(intent);
+        }
+    };
+
+    void checkPermissions()
+    {
+        SharedPreferences settings = getSharedPreferences(MainActivity.PREFS_NAME, 0);
+        mIsAdmin = settings.getBoolean("IsAdmin", false);
+        mIsAuthor = settings.getBoolean("IsAuthor", false);
     }
 }

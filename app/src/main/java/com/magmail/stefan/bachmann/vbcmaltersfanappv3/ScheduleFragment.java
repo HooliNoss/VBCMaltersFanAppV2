@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -76,14 +77,12 @@ public class ScheduleFragment extends Fragment {
         myFragmentView = inflater.inflate(R.layout.fragment_schedule, container, false);
         mRecyclerView = (RecyclerView) myFragmentView.findViewById(R.id.recycler_view_schedules);
         Team[] myDataset = DataGenerator.getAllTeams();
-        //mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view_news);
-        // use this setting to improve performance if you know that changes
-        // in content do not change the layout size of the RecyclerView
+
         mRecyclerView.setHasFixedSize(true);
-        // use a linear layout manager
-        mLayoutManager = new LinearLayoutManager(getActivity());
+
+        mLayoutManager = new GridLayoutManager(getActivity(), 2);
         mRecyclerView.setLayoutManager(mLayoutManager);
-        // specify an adapter (see also next example)
+
         mAdapter = new TeamDisplayAdapter(getActivity(), myDataset, ScheduleActivity.class);
         mRecyclerView.setAdapter(mAdapter);
 

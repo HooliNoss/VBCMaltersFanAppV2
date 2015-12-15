@@ -186,9 +186,6 @@ public class MainActivity extends AppCompatActivity implements NewsFragment.OnFr
 
     private void checkPermissions()
     {
-        setAdminPermissions(false);
-        setAuthorPermissions(false);
-
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         String loginString = settings.getString("loginAdress", "");
 

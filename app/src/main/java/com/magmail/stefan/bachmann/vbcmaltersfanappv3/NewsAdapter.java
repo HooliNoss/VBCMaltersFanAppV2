@@ -1,14 +1,29 @@
 package com.magmail.stefan.bachmann.vbcmaltersfanappv3;
 
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+import com.google.android.gms.common.AccountPicker;
 import com.magmail.stefan.bachmann.vbcmaltersfanappv3.DTOs.News;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by stefan.bachmann on 13.11.2015.
@@ -17,30 +32,115 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolder> {
     private News[] mDataset;
     private Context mContext;
 
-    // Provide a reference to the views for each data item
-    // Complex data items may need more than one view per item, and
-    // you provide access to all the views for a data item in a view holder
+    private boolean mIsAdmin;
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
         public TextView txtTitle;
         public TextView txtDate;
         public TextView txtBody;
         View itemView;
+        public ImageButton btnMoreContent;
+        private ProgressDialog progressDialog;
+
+        private int newsId;
 
         public ViewHolder(View itemLayoutView) {
             super(itemLayoutView);
             txtTitle = (TextView) itemLayoutView.findViewById(R.id.txt_title);
             txtDate = (TextView) itemLayoutView.findViewById(R.id.txt_date_news);
             txtBody = (TextView) itemLayoutView.findViewById(R.id.txt_body);
-
+            btnMoreContent = (ImageButton) itemLayoutView.findViewById(R.id.btn_MoreContent);
+            btnMoreContent.setOnClickListener(btnMoreContentOnClickListener);
             itemView = itemLayoutView;
+        }
+
+        public View.OnClickListener btnMoreContentOnClickListener = new View.OnClickListener() {
+            public void onClick(View v) {
+
+                String[] items = {"Löschen", "Bearbeiten"};
+                AlertDialog.Builder builder = new AlertDialog.Builder(itemView.getContext());
+                builder.setTitle("Bearbeiten")
+                        .setItems(items, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+
+                                if (which == 0) {
+                                    DeleteNews();
+                                } else if (which == 1) {
+                                    UpdateNews();
+                                }
+                            }
+                        });
+
+
+                AlertDialog alertDialog = builder.create();
+                alertDialog.show();
+            }
+        };
+
+        public void DeleteNews() {
+
+            RequestQueue queue = Volley.newRequestQueue(itemView.getContext());
+            String url = "http://grodien.ddns.net:8080/DeleteNews.php";
+
+            progressDialog = ProgressDialog.show(itemView.getContext(), "", "Lösche News...", false, true);
+
+            // Request a string response from the provided URL.
+            StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            // Display the first 500 characters of the response string.
+                            progressDialog.dismiss();
+
+                            Intent intent = new Intent(itemView.getContext(), MainActivity.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            itemView.getContext().startActivity(intent);
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            progressDialog.dismiss();
+
+                            AlertDialog.Builder b = new AlertDialog.Builder(itemView.getContext());
+                            b.setTitle(android.R.string.dialog_alert_title);
+                            b.setMessage("Es konnte keine Verbindung hergestellt werden");
+                            b.setPositiveButton(itemView.getContext().getString(android.R.string.ok),
+                                    new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dlg, int arg1) {
+                                            dlg.dismiss();
+                                        }
+                                    });
+                            b.create().show();
+                        }
+                    }) {
+                @Override
+                protected Map<String, String> getParams() {
+                    Map<String, String> params = new HashMap<String, String>();
+                    params.put("newsID", Integer.toString(newsId));
+                    return params;
+                }
+            };
+            queue.add(stringRequest);
+        }
+
+        private void UpdateNews() {
+            Intent intent = new Intent(itemView.getContext(), AddNewsActivity.class);
+            intent.putExtra("newsID", newsId);
+            intent.putExtra("title", txtTitle.getText());
+            intent.putExtra("body", txtBody.getText());
+            itemView.getContext().startActivity(intent);
         }
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public NewsAdapter(Context context, News[] myDataset) {
+    public NewsAdapter(Context context, News[] myDataset, boolean isAdmin) {
         mContext = context;
         mDataset = myDataset;
+        mIsAdmin = isAdmin;
     }
 
     // Create new views (invoked by the layout manager)
@@ -72,7 +172,13 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolder> {
         holder.txtTitle.setText(mDataset[position].getTitle());
         holder.txtDate.setText(mDataset[position].getDate());
         holder.txtBody.setText(mDataset[position].getBody());
+        holder.newsId = mDataset[position].getId();
 
+        if (mIsAdmin) {
+            holder.btnMoreContent.setVisibility(View.VISIBLE);
+        } else {
+            holder.btnMoreContent.setVisibility(View.GONE);
+        }
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -85,7 +191,6 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolder> {
                 mContext.startActivity(intent);
             }
         });
-
     }
 
     // Return the size of your dataset (invoked by the layout manager)

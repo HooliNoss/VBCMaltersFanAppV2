@@ -55,8 +55,9 @@ public class LoginFragment extends Fragment {
         btnSubmit = (Button) myFragmentView.findViewById(R.id.btnLoginSubmit);
 
         txtTitle.setText("Login");
-        txtInfo.setText("Damit du selber News schreiben kannst, musst du dich hier einloggen. " +
-                "sobald deine E-Mail-Adresse kontrolliert ist, kannst du die App selber aktiv mitgestalten");
+        txtInfo.setText("Damit du selber News schreiben kannst, musst du dich hier einloggen." +
+                "Das ist nötig, damit die App erkennt wer du bist." +
+                "Das ganze funktioniert aber nur, wenn du die eingetragene E-Mail Adresse einem Admin bekannt gegeben hast.");
         btnSubmit.setText("Login");
         btnSubmit.setOnClickListener(btnSubmitOnClickListener);
 

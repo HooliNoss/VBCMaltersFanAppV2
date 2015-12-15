@@ -1,74 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="80dp"
-    >
-
-    <!-- icon -->
+    android:layout_height="60dp"
+    android:paddingStart="10dp"
+    android:paddingEnd="10dp"
+    android:paddingLeft="10dp">
 
     <LinearLayout
-        android:layout_width="fill_parent"
+        android:id="@+id/LenLeft"
+        android:layout_width="match_parent"
         android:layout_height="fill_parent"
-        android:orientation="horizontal"
-        android:background="@android:color/white"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp"
-        android:paddingLeft="10dp">
-
+        android:orientation="horizontal">
 
         <TextView
             android:id="@+id/txt_rank"
-            android:layout_width="30dp"
+            android:layout_width="wrap_content"
             android:layout_height="fill_parent"
-            android:layout_weight="2"
-            android:gravity="start"
             android:textColor="@android:color/black"
-            android:textStyle="bold" >
-
+            android:textStyle="bold">
         </TextView>
 
         <TextView
             android:id="@+id/txt_team"
-            android:layout_width="fill_parent"
+            android:layout_width="150dp"
             android:layout_height="fill_parent"
-            android:layout_gravity="center"
-            android:layout_weight="50"
-            android:paddingStart="0dp"
+            android:paddingStart="10dp"
             android:paddingEnd="10dp"
-            android:paddingLeft="0dp"
+            android:paddingLeft="10dp"
             android:paddingRight="10dp"
             android:textColor="@android:color/black"
-            android:textStyle="bold" >
-
+            android:textStyle="bold">
         </TextView>
 
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/LinRight"
+        android:layout_width="match_parent"
+        android:layout_height="fill_parent"
+        android:orientation="horizontal"
+        android:gravity="end">
 
         <TextView
             android:id="@+id/txt_numberOfGames"
-            android:layout_width="80dp"
+            android:layout_width="70dp"
             android:layout_height="fill_parent"
-            android:layout_gravity="end"
-            android:layout_weight="2"
-            android:gravity="center"
             android:textColor="@android:color/black"
-            android:textStyle="bold" >
-
+            android:textStyle="bold">
         </TextView>
 
         <TextView
             android:id="@+id/txt_points"
-            android:layout_width="80dp"
+            android:layout_width="70dp"
             android:layout_height="fill_parent"
             android:layout_gravity="end"
-            android:layout_weight="2"
-            android:gravity="center"
             android:paddingStart="10dp"
             android:paddingLeft="10dp"
             android:paddingEnd="0dp"
             android:paddingRight="0dp"
             android:textColor="@android:color/black"
-            android:textStyle="bold" >
-
+            android:textStyle="bold">
         </TextView>
     </LinearLayout>
 

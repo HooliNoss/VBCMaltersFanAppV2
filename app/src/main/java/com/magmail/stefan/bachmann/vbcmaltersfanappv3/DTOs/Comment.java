@@ -5,6 +5,7 @@ package com.magmail.stefan.bachmann.vbcmaltersfanappv3.DTOs;
  */
 public class Comment {
 
+    private int id;
     private String author;
     private String date;
     private String body;
@@ -40,5 +41,13 @@ public class Comment {
 
     public void setCommentObject(Object commentObject) {
         this.commentObject = commentObject;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }

@@ -1,9 +1,19 @@
     <!-- Base application theme. -->
-    <resources>
+    <resources
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res/com.magmail.stefan.bachmann.vbcmaltersfanappv3">
         <!-- Base application theme. -->
         <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
             <item name="colorPrimary">#673AB7</item>
             <item name="colorPrimaryDark">#512DA8</item>
             <item name="colorAccent">#FF4081</item>
         </style>
+
+    <style name="VbcMaltersTheme" parent="Theme.AppCompat.Light">
+        <item name="colorPrimary">#ff6600</item>
+        <item name="colorPrimaryDark">#cc3333</item>
+        <item name="colorAccent">#FF4081</item>
+        <item name="android:colorBackground">#E28B8B</item>
+    </style>
+
     </resources>

@@ -2,19 +2,20 @@ package com.magmail.stefan.bachmann.vbcmaltersfanappv3;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -23,9 +24,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.magmail.stefan.bachmann.vbcmaltersfanappv3.DTOs.News;
-import com.magmail.stefan.bachmann.vbcmaltersfanappv3.DTOs.Result;
 
-import org.ksoap2.serialization.SoapObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -42,12 +41,14 @@ public class NewsFragment extends Fragment {
     private ArrayList<News> newsList;
     private ProgressDialog progressDialog;
     XMLParser parser;
+    private boolean mIsAdmin;
+    private boolean mIsAuthor;
 
     private View myFragmentView;
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
-
+    private FloatingActionButton mFabNews;
 
     private OnFragmentInteractionListener mListener;
 
@@ -88,16 +89,19 @@ public class NewsFragment extends Fragment {
         // Inflate the layout for this fragment
         myFragmentView = inflater.inflate(R.layout.fragment_news, container, false);
         mRecyclerView = (RecyclerView) myFragmentView.findViewById(R.id.recycler_view_news);
-        //mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view_news);
-        // use this setting to improve performance if you know that changes
-        // in content do not change the layout size of the RecyclerView
         mRecyclerView.setHasFixedSize(true);
-        // use a linear layout manager
         mLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLayoutManager);
 
+        mFabNews = (FloatingActionButton) myFragmentView.findViewById(R.id.fab_news);
+        mFabNews.setOnClickListener(fabNewsOnClickListener);
+
+        checkPermissions();
+        setContentVisibility();
+
         parser = new XMLParser();
         getNews();
+
         return myFragmentView;
     }
 
@@ -179,7 +183,7 @@ public class NewsFragment extends Fragment {
                         }
 
                         News[] myDataset = newsList.toArray(new News[newsList.size()]);
-                        mAdapter = new NewsAdapter(getActivity(), myDataset);
+                        mAdapter = new NewsAdapter(getActivity(), myDataset, mIsAdmin);
                         mRecyclerView.setAdapter(mAdapter);
                     }
                 }, new Response.ErrorListener() {
@@ -204,4 +208,28 @@ public class NewsFragment extends Fragment {
         queue.add(stringRequest);
 
     }
+
+    void checkPermissions()
+    {
+        SharedPreferences settings = getActivity().getSharedPreferences(MainActivity.PREFS_NAME, 0);
+        mIsAdmin = settings.getBoolean("IsAdmin", false);
+        mIsAuthor = settings.getBoolean("IsAuthor", false);
+    }
+
+    void setContentVisibility()
+    {
+        if (mIsAuthor) {
+            mFabNews.setVisibility(View.VISIBLE);
+        }
+        else {
+            mFabNews.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    private View.OnClickListener fabNewsOnClickListener = new View.OnClickListener() {
+        public void onClick(View v) {
+            Intent intent = new Intent(getActivity(), AddNewsActivity.class);
+            getActivity().startActivity(intent);
+        }
+    };
 }

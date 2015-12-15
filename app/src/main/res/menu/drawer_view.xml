@@ -3,33 +3,35 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_first_fragment"
-            android:icon="@drawable/ic_one"
-            android:title="News"
-            android:checked="true"/>
+            android:checked="true"
+            android:icon="@drawable/ic_content_paste_black_24dp"
+            android:title="News" />
         <item
             android:id="@+id/nav_second_fragment"
-            android:icon="@drawable/ic_two"
+            android:icon="@drawable/ic_format_list_numbered_black_24dp"
             android:title="Rangliste" />
         <item
             android:id="@+id/nav_third_fragment"
-            android:icon="@drawable/ic_three"
+            android:icon="@drawable/ic_assignment_black_24dp"
             android:title="Spielpläne" />
 
 
     </group>
 
-    <item android:title="Erweitert">
-        <menu>
-            <item
-                android:id="@+id/nav_properties_fragment"
-                android:icon="@drawable/ic_one"
-                android:title="Einstellungen" />
-            <item
-                android:id="@+id/nav_login_fragment"
-                android:icon="@drawable/ic_two"
-                android:title="Login" />
-        </menu>
-    </item>
+    <group android:checkableBehavior="single">
+        <item android:title="Erweitert">
+            <menu>
+                <item
+                    android:id="@+id/nav_properties_fragment"
+                    android:icon="@drawable/ic_settings_black_24dp"
+                    android:title="Einstellungen" />
+                <item
+                    android:id="@+id/nav_login_fragment"
+                    android:icon="@drawable/ic_face_black_24dp"
+                    android:title="Login" />
+            </menu>
+        </item>
+    </group>
 
 
 </menu>
