@@ -11,7 +11,7 @@
 
     <style name="VbcMaltersTheme" parent="Theme.AppCompat.Light">
         <item name="colorPrimary">#ff6600</item>
-        <item name="colorPrimaryDark">#cc3333</item>
+        <item name="colorPrimaryDark">#ff6600</item>
         <item name="colorAccent">#FF4081</item>
         <item name="android:colorBackground">#E28B8B</item>
     </style>

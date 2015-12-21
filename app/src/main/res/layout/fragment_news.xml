@@ -18,10 +18,9 @@
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/recycler_view_news"
                 android:scrollbars="vertical"
+                android:background="@color/common_plus_signin_btn_text_dark_disabled"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
-
-
         </LinearLayout>
 
         <android.support.design.widget.FloatingActionButton
@@ -31,6 +30,7 @@
             android:layout_margin="16dp"
             android:clickable="true"
             android:src="@drawable/ic_add_circle_black_24dp"
+            app:backgroundTint="#ff6600"
             app:layout_anchor="@id/viewA"
             app:layout_anchorGravity="bottom|right|end" />
 

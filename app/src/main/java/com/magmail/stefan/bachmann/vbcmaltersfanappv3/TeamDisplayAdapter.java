@@ -19,8 +19,6 @@ public class TeamDisplayAdapter extends RecyclerView.Adapter<TeamDisplayAdapter.
     private Context mContext;
     private Class mNextActivity;
 
-    private static final String THUMBEXTENSION = "_thumb";
-
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
@@ -77,7 +75,7 @@ public class TeamDisplayAdapter extends RecyclerView.Adapter<TeamDisplayAdapter.
         // - replace the contents of the view with that element
         // Setting all values in listview
         final Context context =  holder.thumb_image.getContext();
-        int id = context.getResources().getIdentifier(mDataset[position].getM_ImgSrc()+THUMBEXTENSION, "drawable", context.getPackageName());
+        int id = context.getResources().getIdentifier(mDataset[position].getM_ImgSrc()+MainActivity.THUMBEXTENSION, "drawable", context.getPackageName());
         holder.thumb_image.setImageResource(id);
 
         holder.teamName.setText(mDataset[position].getM_Name());

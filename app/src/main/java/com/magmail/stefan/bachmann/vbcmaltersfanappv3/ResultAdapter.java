@@ -1,6 +1,7 @@
 package com.magmail.stefan.bachmann.vbcmaltersfanappv3;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -51,6 +52,14 @@ public class ResultAdapter extends RecyclerView.Adapter<ResultAdapter.ViewHolder
                 .inflate(R.layout.item_layout_results, parent, false);
         // set the view's size, margins, paddings and layout parameters
 
+        v.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
         ViewHolder vh = new ViewHolder(v);
         return vh;
     }
@@ -67,6 +76,12 @@ public class ResultAdapter extends RecyclerView.Adapter<ResultAdapter.ViewHolder
         holder.txtRank.setText(mDataset[position].getmRank());
         holder.data = mDataset[position].getmSoapObject();
 
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
     }
 
     // Return the size of your dataset (invoked by the layout manager)

@@ -1,4 +1,4 @@
-package com.magmail.stefan.bachmann.vbcmaltersfanappv3;
+package com.magmail.stefan.bachmann.vbcmaltersfanappv3.NetworkHelpers;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;

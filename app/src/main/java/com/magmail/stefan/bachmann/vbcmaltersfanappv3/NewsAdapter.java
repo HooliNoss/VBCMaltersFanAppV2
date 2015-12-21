@@ -5,12 +5,13 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.volley.Request;
@@ -19,9 +20,13 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.google.android.gms.common.AccountPicker;
 import com.magmail.stefan.bachmann.vbcmaltersfanappv3.DTOs.News;
+import com.magmail.stefan.bachmann.vbcmaltersfanappv3.NetworkHelpers.ServerConnection;
+import com.magmail.stefan.bachmann.vbcmaltersfanappv3.VBCData.DataGenerator;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,7 +36,6 @@ import java.util.Map;
 public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolder> {
     private News[] mDataset;
     private Context mContext;
-
     private boolean mIsAdmin;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -42,8 +46,10 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolder> {
         View itemView;
         public ImageButton btnMoreContent;
         private ProgressDialog progressDialog;
+        public ImageView imageViewNews;
 
         private int newsId;
+        private String newsTag;
 
         public ViewHolder(View itemLayoutView) {
             super(itemLayoutView);
@@ -52,6 +58,7 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolder> {
             txtBody = (TextView) itemLayoutView.findViewById(R.id.txt_body);
             btnMoreContent = (ImageButton) itemLayoutView.findViewById(R.id.btn_MoreContent);
             btnMoreContent.setOnClickListener(btnMoreContentOnClickListener);
+            imageViewNews = (ImageView) itemLayoutView.findViewById(R.id.imageView_news);
             itemView = itemLayoutView;
         }
 
@@ -81,7 +88,7 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolder> {
         public void DeleteNews() {
 
             RequestQueue queue = Volley.newRequestQueue(itemView.getContext());
-            String url = "http://grodien.ddns.net:8080/DeleteNews.php";
+            String url = ServerConnection.SERVERURL + "DeleteNews.php";
 
             progressDialog = ProgressDialog.show(itemView.getContext(), "", "Lösche News...", false, true);
 
@@ -132,6 +139,7 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolder> {
             intent.putExtra("newsID", newsId);
             intent.putExtra("title", txtTitle.getText());
             intent.putExtra("body", txtBody.getText());
+            intent.putExtra("newsTag", newsTag);
             itemView.getContext().startActivity(intent);
         }
     }
@@ -167,30 +175,50 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolder> {
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
-        // - get element from your dataset at this position
-        // - replace the contents of the view with that element
-        holder.txtTitle.setText(mDataset[position].getTitle());
-        holder.txtDate.setText(mDataset[position].getDate());
-        holder.txtBody.setText(mDataset[position].getBody());
-        holder.newsId = mDataset[position].getId();
+        try {
+            // - get element from your dataset at this position
+            // - replace the contents of the view with that element
+            SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+            SimpleDateFormat fmtOut = new SimpleDateFormat("dd.MM.yyyy");
+            SimpleDateFormat fmTime = new SimpleDateFormat("HH:mm");
 
-        if (mIsAdmin) {
-            holder.btnMoreContent.setVisibility(View.VISIBLE);
-        } else {
-            holder.btnMoreContent.setVisibility(View.GONE);
-        }
+            holder.txtTitle.setText(mDataset[position].getTitle());
 
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(mContext, CommentActivity.class);
-                intent.putExtra("newsId", mDataset[position].getId());
-                intent.putExtra("title", mDataset[position].getTitle());
-                intent.putExtra("date", mDataset[position].getDate());
-                intent.putExtra("body", mDataset[position].getBody());
-                mContext.startActivity(intent);
+            Date date = fmt.parse(mDataset[position].getDate());
+            String formatedDate = fmtOut.format(date) + " " + fmTime.format(date);
+
+            holder.txtDate.setText(formatedDate);
+            holder.txtBody.setText(mDataset[position].getBody());
+            holder.newsId = mDataset[position].getId();
+            holder.newsTag = mDataset[position].getNewsTag();
+
+            final Context context = holder.imageViewNews.getContext();
+            String imageName = DataGenerator.getImageStringByNewsTag(mDataset[position].getNewsTag());
+            int id = context.getResources().getIdentifier(imageName + MainActivity.THUMBEXTENSION, "drawable", context.getPackageName());
+            holder.imageViewNews.setImageResource(id);
+
+            if (mIsAdmin) {
+                holder.btnMoreContent.setVisibility(View.VISIBLE);
+            } else {
+                holder.btnMoreContent.setVisibility(View.GONE);
             }
-        });
+
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(mContext, CommentActivity.class);
+                    intent.putExtra("newsId", mDataset[position].getId());
+                    intent.putExtra("title", mDataset[position].getTitle());
+                    intent.putExtra("date", mDataset[position].getDate());
+                    intent.putExtra("body", mDataset[position].getBody());
+                    intent.putExtra("newsTag", mDataset[position].getNewsTag());
+                    mContext.startActivity(intent);
+                }
+            });
+
+        }catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 
     // Return the size of your dataset (invoked by the layout manager)

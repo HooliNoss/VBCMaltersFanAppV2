@@ -22,7 +22,11 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.magmail.stefan.bachmann.vbcmaltersfanappv3.DTOs.Comment;
 import com.magmail.stefan.bachmann.vbcmaltersfanappv3.DTOs.News;
+import com.magmail.stefan.bachmann.vbcmaltersfanappv3.NetworkHelpers.ServerConnection;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -84,7 +88,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHold
         public void DeleteComment() {
 
             RequestQueue queue = Volley.newRequestQueue(itemView.getContext());
-            String url = "http://grodien.ddns.net:8080/DeleteComment.php";
+            String url = ServerConnection.SERVERURL + "DeleteComment.php";
 
             progressDialog = ProgressDialog.show(itemView.getContext(), "", "Lösche Kommentar...", false, true);
 
@@ -164,23 +168,34 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHold
     public void onBindViewHolder(ViewHolder holder, int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
-        holder.txtAuthor.setText(mDataset[position].getAuthor());
-        holder.txtDate.setText(mDataset[position].getDate());
-        holder.txtBody.setText(mDataset[position].getBody());
-        holder.commentId = mDataset[position].getId();
+        try {
+            SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+            SimpleDateFormat fmtOut = new SimpleDateFormat("dd.MM.yyyy");
+            SimpleDateFormat fmTime = new SimpleDateFormat("HH:mm");
 
-        if (mIsAdmin) {
-            holder.btnMoreContent.setVisibility(View.VISIBLE);
-        } else {
-            holder.btnMoreContent.setVisibility(View.GONE);
-        }
+            holder.txtAuthor.setText(mDataset[position].getAuthor());
+            Date date = fmt.parse(mDataset[position].getDate());
+            String formatedDate = fmtOut.format(date) + " " + fmTime.format(date);
 
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+            holder.txtDate.setText(formatedDate);
+            holder.txtBody.setText(mDataset[position].getBody());
+            holder.commentId = mDataset[position].getId();
 
+            if (mIsAdmin) {
+                holder.btnMoreContent.setVisibility(View.VISIBLE);
+            } else {
+                holder.btnMoreContent.setVisibility(View.GONE);
             }
-        });
+
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                }
+            });
+        }catch (ParseException e) {
+            e.printStackTrace();
+        }
 
     }
 

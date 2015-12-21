@@ -4,17 +4,26 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
+import android.widget.ImageView;
 
 import com.magmail.stefan.bachmann.vbcmaltersfanappv3.DTOs.Result;
 import com.magmail.stefan.bachmann.vbcmaltersfanappv3.DTOs.Team;
+import com.magmail.stefan.bachmann.vbcmaltersfanappv3.NetworkHelpers.SOAPConnection;
+import com.magmail.stefan.bachmann.vbcmaltersfanappv3.VBCData.DataGenerator;
 
 import org.ksoap2.serialization.SoapObject;
+
 
 import java.util.ArrayList;
 
@@ -30,11 +39,34 @@ public class ResultActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+    private CollapsingToolbarLayout collapsingToolbarLayout;
+    private ImageView mImageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_result);
+
+        team = DataGenerator.getTeamById(getIntent().getIntExtra("teamId", 0));
+
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
+        //appBarLayout.setExpanded(false, false);
+
+        ViewCompat.setTransitionName(findViewById(R.id.app_bar_layout), "placeholder_thumb");
+        collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
+        collapsingToolbarLayout.setTitle("Rangliste");
+        //collapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
+        collapsingToolbarLayout.setContentScrimColor(getResources().getColor(R.color.theme_color_vbc));
+        collapsingToolbarLayout.setStatusBarScrimColor(getResources().getColor(R.color.theme_color_vbc));
+
+        mImageView = (ImageView) findViewById(R.id.resultImage);
+
+        int id = getResources().getIdentifier(team.getM_ImgSrc()+MainActivity.THUMBEXTENSION, "drawable", getPackageName());
+        mImageView.setImageResource(id);
 
         mContext = this;
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view_resultActivity);
@@ -42,9 +74,19 @@ public class ResultActivity extends AppCompatActivity {
 
         mLayoutManager = new LinearLayoutManager(mContext);
         mRecyclerView.setLayoutManager(mLayoutManager);
-        team = DataGenerator.getTeamById(getIntent().getIntExtra("teamId", 0));
 
         getResults();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     private void getResults()
@@ -54,7 +96,7 @@ public class ResultActivity extends AppCompatActivity {
             @Override
             protected void onPreExecute()
             {
-                progressDialog = ProgressDialog.show(ResultActivity.this, "", "Loading Results...", false, true);
+                progressDialog = ProgressDialog.show(ResultActivity.this, "", "Lade Rangliste...", false, true);
             }
 
             @Override

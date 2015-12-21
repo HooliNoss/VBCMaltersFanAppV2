@@ -18,19 +18,24 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.magmail.stefan.bachmann.vbcmaltersfanappv3.NetworkHelpers.ServerConnection;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class AddCommentActivity extends AppCompatActivity {
 
-    private TextView mAuthor;
-    private TextView mBody;
+    private TextView mTextViewAuthor;
+    private TextView mTextViewBody;
     private FloatingActionButton mFabSend;
     private Context mContext;
     private ProgressDialog progressDialog;
 
     private int mNewsId;
+    private String mTitle;
+    private String mDate;
+    private String mBody;
+    private String mNewsTag;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,20 +44,23 @@ public class AddCommentActivity extends AppCompatActivity {
 
         mContext = this;
 
-        mAuthor = (TextView) findViewById(R.id.txtAuthor);
-        mBody = (TextView) findViewById(R.id.txtBody);
+        mTextViewAuthor = (TextView) findViewById(R.id.txtAuthor);
+        mTextViewBody = (TextView) findViewById(R.id.txtBody);
         mFabSend = (FloatingActionButton) findViewById(R.id.fab_sendComment);
         mFabSend.setOnClickListener(fabSendNewsOnClickListener);
 
         mNewsId = getIntent().getIntExtra("newsId", 0);
-
+        mTitle = getIntent().getStringExtra("title");
+        mDate = getIntent().getStringExtra("date");
+        mBody = getIntent().getStringExtra("body");
+        mNewsTag = getIntent().getStringExtra("newsTag");
     }
 
     private View.OnClickListener fabSendNewsOnClickListener = new View.OnClickListener() {
         public void onClick(View v) {
 
-            String creator = mAuthor.getText().toString();
-            String meldung = mBody.getText().toString();
+            String creator = mTextViewAuthor.getText().toString();
+            String meldung = mTextViewBody.getText().toString();
 
             if (creator.equals("") && meldung.equals("")) {
                 final Dialog dialog = new Dialog(AddCommentActivity.this);
@@ -66,16 +74,15 @@ public class AddCommentActivity extends AppCompatActivity {
                 dialog.setCanceledOnTouchOutside(true);
                 dialog.show();
             } else {
-                sendNews(creator, meldung);
+                sendComment(creator, meldung);
             }
         }
     };
 
-    private void sendNews(final String creator, final String meldung) {
+    private void sendComment(final String creator, final String meldung) {
 
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url = "http://grodien.ddns.net:8080/SetComment.php";
-
+        String url = ServerConnection.SERVERURL +  "SetComment.php";
 
         progressDialog = ProgressDialog.show(this, "", "Sende Kommentar...", false, true);
 
@@ -88,8 +95,13 @@ public class AddCommentActivity extends AppCompatActivity {
                         // Display the first 500 characters of the response string.
                         progressDialog.dismiss();
 
-                        Intent intent = new Intent(AddCommentActivity.this, MainActivity.class);
+                        Intent intent = new Intent(AddCommentActivity.this, CommentActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        intent.putExtra("newsId", mNewsId);
+                        intent.putExtra("title", mTitle);
+                        intent.putExtra("date", mDate);
+                        intent.putExtra("body", mBody);
+                        intent.putExtra("newsTag", mNewsTag);
                         startActivity(intent);
                     }
                 },

@@ -13,7 +13,17 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.AccountPicker;
+import com.magmail.stefan.bachmann.vbcmaltersfanappv3.NetworkHelpers.ServerConnection;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class LoginFragment extends Fragment {
     private View myFragmentView;
@@ -54,10 +64,11 @@ public class LoginFragment extends Fragment {
         txtInfo = (TextView) myFragmentView.findViewById(R.id.txtLoginInfo);
         btnSubmit = (Button) myFragmentView.findViewById(R.id.btnLoginSubmit);
 
-        txtTitle.setText("Login");
-        txtInfo.setText("Damit du selber News schreiben kannst, musst du dich hier einloggen." +
+        txtTitle.setText("Für Mitglieder vom VBC Malters:");
+        txtInfo.setText("Du willst selber News für dein Team erstellen? Das finden wir super. Die App wird dadurch noch viel lebendiger \n\n" +
+                "Damit dies geht musst du erstmals deine E-Mail Adresse bekannt geben." +
                 "Das ist nötig, damit die App erkennt wer du bist." +
-                "Das ganze funktioniert aber nur, wenn du die eingetragene E-Mail Adresse einem Admin bekannt gegeben hast.");
+                "Anschliessend melde dich bei einem Admin (oder deinem Trainer) damit dir die Berechtigungen erteilt werden");
         btnSubmit.setText("Login");
         btnSubmit.setOnClickListener(btnSubmitOnClickListener);
 
@@ -104,13 +115,41 @@ public class LoginFragment extends Fragment {
     public void onActivityResult(final int requestCode, final int resultCode,
                                     final Intent data) {
 
-        if (requestCode == -1) {
-            String accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+        if (resultCode == -1) {
+            final String accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
 
-            final SharedPreferences settings = getActivity().getSharedPreferences(MainActivity.PREFS_NAME, 0);
+            final SharedPreferences settings = getActivity().getSharedPreferences(AppPreferences.PREFS_NAME, 0);
             final SharedPreferences.Editor editor = settings.edit();
-            editor.putString("loginAdress", accountName);
+            editor.putString(AppPreferences.LOGIN_ADRESS, accountName);
             editor.commit();
+
+            RequestQueue queue = Volley.newRequestQueue(getContext());
+            String url = ServerConnection.SERVERURL + "SetRequestedAuthor.php";
+
+
+            // Request a string response from the provided URL.
+            StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            // Display the first 500 characters of the response string.
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                        }
+                    }) {
+
+                @Override
+                protected Map<String, String> getParams() {
+                    Map<String, String> params = new HashMap<String, String>();
+                    params.put("email", accountName);
+                    return params;
+                }
+            };
+            queue.add(stringRequest);
         }
     }
 

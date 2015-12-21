@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/LinearLayout01"
+    android:id="@+id/layout_schedule"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:layout_alignParentLeft="true"
@@ -29,7 +29,9 @@
             android:id="@+id/txt_time"
             android:width="100dp"
             android:textColor="@android:color/black"
-            android:textStyle="bold">
+            android:textStyle="bold"
+            android:paddingLeft="10dp"
+            android:paddingStart="10dp">
         </TextView>
 
     </LinearLayout>

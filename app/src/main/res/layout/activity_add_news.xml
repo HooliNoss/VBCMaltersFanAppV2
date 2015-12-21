@@ -22,14 +22,20 @@
             android:id="@+id/lin01"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingTop="50dp">
+
+            <Spinner
+                android:id="@+id/spinnerNewsTag"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
 
             <EditText
                 android:id="@+id/txtTitle"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text"
-                android:text="Titel"
+                android:hint="Titel"
                 android:textColor="@android:color/secondary_text_dark">
 
                 <requestFocus />
@@ -41,7 +47,7 @@
                 android:layout_height="wrap_content"
                 android:inputType="textMultiLine"
                 android:maxHeight="200dp"
-                android:text="Nachricht"
+                android:hint="Nachricht"
                 android:textColor="@android:color/secondary_text_dark" />
 
         </LinearLayout>
@@ -53,6 +59,7 @@
             android:layout_margin="16dp"
             android:clickable="true"
             android:src="@drawable/ic_check_circle_black_24dp"
+            app:backgroundTint="#ff6600"
             app:layout_anchor="@id/lin01"
             app:layout_anchorGravity="top|right|end" />
 

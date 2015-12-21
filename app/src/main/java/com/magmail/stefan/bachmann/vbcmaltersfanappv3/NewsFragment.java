@@ -15,7 +15,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -24,6 +23,8 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.magmail.stefan.bachmann.vbcmaltersfanappv3.DTOs.News;
+import com.magmail.stefan.bachmann.vbcmaltersfanappv3.NetworkHelpers.ServerConnection;
+import com.magmail.stefan.bachmann.vbcmaltersfanappv3.NetworkHelpers.XMLParser;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -147,7 +148,7 @@ public class NewsFragment extends Fragment {
     private void getNews()
     {
         RequestQueue queue = Volley.newRequestQueue(getActivity());
-        String url ="http://grodien.ddns.net:8080/GetNews.php";
+        String url = ServerConnection.SERVERURL + "GetNews.php";
 
         progressDialog = ProgressDialog.show(getActivity(), "", "Lade News...", false, true);
 
@@ -177,6 +178,7 @@ public class NewsFragment extends Fragment {
                             news.setDate(formatedDate);
                             news.setTitle(parser.getValue(e, "NewsTitle"));
                             news.setBody(parser.getValue(e, "NewsBody"));
+                            news.setNewsTag(parser.getValue(e, "NewsTag"));
                             news.setNewsObject(e);
 
                             newsList.add(news);
@@ -211,9 +213,9 @@ public class NewsFragment extends Fragment {
 
     void checkPermissions()
     {
-        SharedPreferences settings = getActivity().getSharedPreferences(MainActivity.PREFS_NAME, 0);
-        mIsAdmin = settings.getBoolean("IsAdmin", false);
-        mIsAuthor = settings.getBoolean("IsAuthor", false);
+        SharedPreferences settings = getActivity().getSharedPreferences(AppPreferences.PREFS_NAME, 0);
+        mIsAdmin = settings.getBoolean(AppPreferences.IS_ADMIN, false);
+        mIsAuthor = settings.getBoolean(AppPreferences.IS_AUTHOR, false);
     }
 
     void setContentVisibility()

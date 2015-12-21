@@ -1,5 +1,6 @@
-package com.magmail.stefan.bachmann.vbcmaltersfanappv3;
+package com.magmail.stefan.bachmann.vbcmaltersfanappv3.VBCData;
 
+import com.magmail.stefan.bachmann.vbcmaltersfanappv3.DTOs.Club;
 import com.magmail.stefan.bachmann.vbcmaltersfanappv3.DTOs.Team;
 
 import java.util.ArrayList;
@@ -34,6 +35,15 @@ public class DataGenerator {
         return ret;
     }
 
+    public static Club getClub()
+    {
+        Club myClub = new Club();
+        myClub.setM_ClubName("VBC Malters");
+        myClub.setM_ClubId(911360);
+
+        return myClub;
+    }
+
     public static Team getTeamById(int id) {
         if (id == 0)
             return null;
@@ -50,7 +60,29 @@ public class DataGenerator {
         return ret;
     }
 
-    public static void generateTeams()
+    public static String getImageStringByNewsTag(String newsTag)
+    {
+        if (newsTag == "Allgemein")
+            return "placeholder";
+
+        for(Team team : teamList){
+            if (team.getM_Name().equals(newsTag))
+                return team.getM_ImgSrc();
+        }
+
+        return "placeholder";
+    }
+
+    public static String[] getAllNewsTags()
+    {
+        String[] newsTags = {"Damen 1", "Damen 2", "Herren 1", "Herren 2", "Herren 3",
+                             "Juniorinnen 1", "Juniorinnen 2", "Juniorinnen 3",
+                             "Junioren 1", "Allgemein"};
+
+        return newsTags;
+    }
+
+    private static void generateTeams()
     {
         Team damen1 = new Team();
         damen1.setM_Name("Damen 1");

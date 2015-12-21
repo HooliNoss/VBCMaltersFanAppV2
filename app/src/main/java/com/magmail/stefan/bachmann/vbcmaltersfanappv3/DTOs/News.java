@@ -11,6 +11,7 @@ public class News {
     private String title;
     private String date;
     private String body;
+    private String newsTag;
     private Object newsObject;
 
     public Object getNewsObject() {
@@ -53,7 +54,11 @@ public class News {
         this.body = body;
     }
 
+    public String getNewsTag() {
+        return newsTag;
+    }
 
-
-
+    public void setNewsTag(String newsTag) {
+        this.newsTag = newsTag;
+    }
 }

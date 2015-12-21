@@ -10,6 +10,8 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.android.volley.Request;
@@ -18,6 +20,8 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.magmail.stefan.bachmann.vbcmaltersfanappv3.NetworkHelpers.ServerConnection;
+import com.magmail.stefan.bachmann.vbcmaltersfanappv3.VBCData.DataGenerator;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +30,7 @@ public class AddNewsActivity extends AppCompatActivity {
 
     private TextView mTitle;
     private TextView mBody;
+    private Spinner mSpinnerNewsTag;
     private FloatingActionButton mFabSend;
     private Context mContext;
     private ProgressDialog progressDialog;
@@ -41,21 +46,27 @@ public class AddNewsActivity extends AppCompatActivity {
 
         mTitle = (TextView) findViewById(R.id.txtTitle);
         mBody = (TextView) findViewById(R.id.txtBody);
+        mSpinnerNewsTag = (Spinner) findViewById(R.id.spinnerNewsTag);
         mFabSend = (FloatingActionButton) findViewById(R.id.fab_sendNews);
         mFabSend.setOnClickListener(fabSendNewsOnClickListener);
 
         mNewsId = getIntent().getIntExtra("newsID", 0);
         String title = getIntent().getStringExtra("title");
         String body = getIntent().getStringExtra("body");
+        String newsTag = getIntent().getStringExtra("newsTag");
 
-        if (title == null)
-            title = "Titel";
+        String[] newsTags = DataGenerator.getAllNewsTags();
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, newsTags);
+        mSpinnerNewsTag.setAdapter(adapter);
 
-        if (body == null)
-            body = "Nachricht";
+        if (title != null)
+            mTitle.setText(title);
 
-        mTitle.setText(title);
-        mBody.setText(body);
+        if (body != null)
+            mBody.setText(body);
+
+        if (newsTag != null)
+            mSpinnerNewsTag.setSelection(adapter.getPosition(newsTag));
     }
 
     private View.OnClickListener fabSendNewsOnClickListener = new View.OnClickListener() {
@@ -63,6 +74,7 @@ public class AddNewsActivity extends AppCompatActivity {
 
             String titel = mTitle.getText().toString();
             String meldung = mBody.getText().toString();
+            String tag = mSpinnerNewsTag.getSelectedItem().toString();
 
             if (titel.equals("") && meldung.equals("")) {
                 final Dialog dialog = new Dialog(AddNewsActivity.this);
@@ -76,20 +88,20 @@ public class AddNewsActivity extends AppCompatActivity {
                 dialog.setCanceledOnTouchOutside(true);
                 dialog.show();
             } else {
-                sendNews(titel, meldung);
+                sendNews(titel, meldung, tag);
             }
         }
     };
 
-    private void sendNews(final String titel, final String meldung) {
+    private void sendNews(final String titel, final String meldung, final String tag) {
 
         RequestQueue queue = Volley.newRequestQueue(this);
         String url = "";
 
         if (mNewsId == 0)
-            url = "http://grodien.ddns.net:8080/SetNews.php";
+            url = ServerConnection.SERVERURL + "SetNews.php";
         else
-            url = "http://grodien.ddns.net:8080/UpdateNews.php";
+            url = ServerConnection.SERVERURL + "UpdateNews.php";
 
 
         progressDialog = ProgressDialog.show(this, "", "Sende News...", false, true);
@@ -134,7 +146,7 @@ public class AddNewsActivity extends AppCompatActivity {
 
                 params.put("title", titel);
                 params.put("body", meldung);
-                params.put("tag", "Info");
+                params.put("tag", tag);
                 return params;
             }
         };

@@ -1,22 +1,23 @@
 package com.magmail.stefan.bachmann.vbcmaltersfanappv3;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
-import android.app.ProgressDialog;
-import android.content.DialogInterface;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.net.Uri;
+import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.view.GravityCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 
 import com.android.volley.Request;
@@ -25,17 +26,24 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.magmail.stefan.bachmann.vbcmaltersfanappv3.DTOs.News;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.magmail.stefan.bachmann.vbcmaltersfanappv3.NetworkHelpers.ServerConnection;
+import com.magmail.stefan.bachmann.vbcmaltersfanappv3.NetworkHelpers.XMLParser;
+import com.magmail.stefan.bachmann.vbcmaltersfanappv3.PushNotification.RegistrationIntentService;
+import com.magmail.stefan.bachmann.vbcmaltersfanappv3.VBCData.DataGenerator;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import java.util.ArrayList;
+public class MainActivity extends AppCompatActivity implements NewsFragment.OnFragmentInteractionListener, ResultFragment.OnFragmentInteractionListener, ScheduleFragment.OnFragmentInteractionListener, LoginFragment.OnFragmentInteractionListener, PropertiesFragment.OnFragmentInteractionListener {
 
-public class MainActivity extends AppCompatActivity implements NewsFragment.OnFragmentInteractionListener, ResultFragment.OnFragmentInteractionListener, ScheduleFragment.OnFragmentInteractionListener, LoginFragment.OnFragmentInteractionListener{
+    public static final String THUMBEXTENSION = "_thumb";
+    private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
+    private static final String TAG = "MainActivity";
 
-    public static final String PREFS_NAME = "VBCMaltersFanAppPreferences";
+    private BroadcastReceiver mRegistrationBroadcastReceiver;
 
     private DrawerLayout mDrawer;
     private DrawerLayout dlDrawer;
@@ -49,6 +57,31 @@ public class MainActivity extends AppCompatActivity implements NewsFragment.OnFr
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        DataGenerator.getAllTeams();
+
+        mRegistrationBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                SharedPreferences sharedPreferences =
+                        PreferenceManager.getDefaultSharedPreferences(context);
+                boolean sentToken = sharedPreferences
+                        .getBoolean(AppPreferences.SENT_TOKEN_TO_SERVER, false);
+                if (sentToken) {
+                    int asdf = 0;
+                    //mInformationTextView.setText(getString(R.string.gcm_send_message));
+                } else {
+                    int asdf = 0;
+                    //mInformationTextView.setText(getString(R.string.token_error_message));
+                }
+            }
+        };
+
+        if (checkPlayServices()) {
+            // Start IntentService to register this application with GCM.
+            Intent intent = new Intent(this, RegistrationIntentService.class);
+            startService(intent);
+        }
 
         // Set a Toolbar to replace the ActionBar.
         toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -71,6 +104,19 @@ public class MainActivity extends AppCompatActivity implements NewsFragment.OnFr
 
         checkPermissions();
         nvDrawer.getMenu().performIdentifierAction(R.id.nav_first_fragment, 0);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
+                new IntentFilter(AppPreferences.REGISTRATION_COMPLETE));
+    }
+
+    @Override
+    protected void onPause() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mRegistrationBroadcastReceiver);
+        super.onPause();
     }
 
     @Override
@@ -115,8 +161,8 @@ public class MainActivity extends AppCompatActivity implements NewsFragment.OnFr
         // position
         Fragment fragment = null;
 
-        Class fragmentClass;
-        switch(menuItem.getItemId()) {
+        Class fragmentClass = null;
+        switch (menuItem.getItemId()) {
             case R.id.nav_first_fragment:
                 fragmentClass = NewsFragment.class;
                 break;
@@ -126,6 +172,13 @@ public class MainActivity extends AppCompatActivity implements NewsFragment.OnFr
             case R.id.nav_third_fragment:
                 fragmentClass = ScheduleFragment.class;
                 break;
+            case R.id.nav_fourth_fragment:
+                Intent intent = new Intent(this, ScheduleActivity.class);
+                startActivity(intent);
+                break;
+            case R.id.nav_properties_fragment:
+                fragmentClass = PropertiesFragment.class;
+                break;
             case R.id.nav_login_fragment:
                 fragmentClass = LoginFragment.class;
                 break;
@@ -134,23 +187,26 @@ public class MainActivity extends AppCompatActivity implements NewsFragment.OnFr
         }
 
         try {
-            fragment = (Fragment) fragmentClass.newInstance();
+            if (fragmentClass != null) {
+                fragment = (Fragment) fragmentClass.newInstance();
+
+
+                // Insert the fragment by replacing any existing fragment
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                fragmentManager.beginTransaction().replace(R.id.flContent, fragment).commit();
+
+                // Highlight the selected item, update the title, and close the drawer
+                menuItem.setChecked(true);
+                setTitle(menuItem.getTitle());
+                mDrawer.closeDrawers();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        // Insert the fragment by replacing any existing fragment
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.flContent, fragment).commit();
-
-        // Highlight the selected item, update the title, and close the drawer
-        menuItem.setChecked(true);
-        setTitle(menuItem.getTitle());
-        mDrawer.closeDrawers();
     }
 
     private ActionBarDrawerToggle setupDrawerToggle() {
-        return new ActionBarDrawerToggle(this, dlDrawer, toolbar, R.string.drawer_open,  R.string.drawer_close);
+        return new ActionBarDrawerToggle(this, dlDrawer, toolbar, R.string.drawer_open, R.string.drawer_close);
     }
 
     @Override
@@ -161,43 +217,42 @@ public class MainActivity extends AppCompatActivity implements NewsFragment.OnFr
     }
 
     @Override
-    public void onNewsFragmentInteraction(Uri string)
-    {
+    public void onNewsFragmentInteraction(Uri string) {
 
     }
 
     @Override
-    public void onResultFragmentInteraction(Uri string)
-    {
+    public void onResultFragmentInteraction(Uri string) {
 
     }
 
     @Override
-    public void onScheduleFragmentInteraction(Uri string)
-    {
+    public void onScheduleFragmentInteraction(Uri string) {
 
     }
 
     @Override
-    public void onLoginFragmentInteraction(Uri string)
-    {
+    public void onLoginFragmentInteraction(Uri string) {
 
     }
 
-    private void checkPermissions()
-    {
-        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-        String loginString = settings.getString("loginAdress", "");
+    @Override
+    public void onPropertiesFragmentInteraction(Uri uri) {
+
+    }
+
+    private void checkPermissions() {
+        SharedPreferences settings = getSharedPreferences(AppPreferences.PREFS_NAME, 0);
+        String loginString = settings.getString(AppPreferences.LOGIN_ADRESS, "");
 
         checkAdminPermission(loginString);
         checkAuthorPermission(loginString);
     }
 
-    private void checkAdminPermission(String name)
-    {
+    private void checkAdminPermission(String name) {
         final XMLParser parser = new XMLParser();
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url ="http://grodien.ddns.net:8080/CheckAdminPermission.php?name=" + "'" + name + "'";
+        String url = ServerConnection.SERVERURL + "CheckAdminPermission.php?name=" + "'" + name + "'";
 
         // Request a string response from the provided URL.
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
@@ -210,11 +265,10 @@ public class MainActivity extends AppCompatActivity implements NewsFragment.OnFr
                         NodeList nl = doc.getElementsByTagName(KEY_ITEM);
 
                         // looping through all item nodes <item>
-                        for (int i = 0; i < nl.getLength(); i++)
-                        {
+                        for (int i = 0; i < nl.getLength(); i++) {
                             Element e = (Element) nl.item(i);
 
-                            String isAdmin = parser.getValue(e, "IsAdmin");
+                            String isAdmin = parser.getValue(e, AppPreferences.IS_ADMIN);
 
                             if (!isAdmin.isEmpty()) {
                                 setAdminPermissions(Boolean.parseBoolean(isAdmin));
@@ -231,11 +285,10 @@ public class MainActivity extends AppCompatActivity implements NewsFragment.OnFr
         queue.add(stringRequest);
     }
 
-    private void checkAuthorPermission(String name)
-    {
+    private void checkAuthorPermission(String name) {
         final XMLParser parser = new XMLParser();
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url ="http://grodien.ddns.net:8080/CheckAuthorPermission.php?name=" + "'" + name + "'";
+        String url = ServerConnection.SERVERURL + "CheckAuthorPermission.php?name=" + "'" + name + "'";
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
 
@@ -247,11 +300,10 @@ public class MainActivity extends AppCompatActivity implements NewsFragment.OnFr
                         NodeList nl = doc.getElementsByTagName(KEY_ITEM);
 
                         // looping through all item nodes <item>
-                        for (int i = 0; i < nl.getLength(); i++)
-                        {
+                        for (int i = 0; i < nl.getLength(); i++) {
                             Element e = (Element) nl.item(i);
 
-                            String isAuthor = parser.getValue(e, "IsAuthor");
+                            String isAuthor = parser.getValue(e, AppPreferences.IS_AUTHOR);
 
                             if (!isAuthor.isEmpty()) {
                                 setAuthorPermissions(Boolean.parseBoolean(isAuthor));
@@ -267,19 +319,33 @@ public class MainActivity extends AppCompatActivity implements NewsFragment.OnFr
         queue.add(stringRequest);
     }
 
-    private void setAdminPermissions(boolean isAdmin)
-    {
-        final SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+    private void setAdminPermissions(boolean isAdmin) {
+        final SharedPreferences settings = getSharedPreferences(AppPreferences.PREFS_NAME, 0);
         final SharedPreferences.Editor editor = settings.edit();
-        editor.putBoolean("IsAdmin", isAdmin);
+        editor.putBoolean(AppPreferences.IS_ADMIN, isAdmin);
         editor.commit();
     }
 
-    private void setAuthorPermissions(boolean isAuthor)
-    {
-        final SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+    private void setAuthorPermissions(boolean isAuthor) {
+        final SharedPreferences settings = getSharedPreferences(AppPreferences.PREFS_NAME, 0);
         final SharedPreferences.Editor editor = settings.edit();
-        editor.putBoolean("IsAuthor", isAuthor);
+        editor.putBoolean(AppPreferences.IS_AUTHOR, isAuthor);
         editor.commit();
+    }
+
+    private boolean checkPlayServices() {
+        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
+        int resultCode = apiAvailability.isGooglePlayServicesAvailable(this);
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (apiAvailability.isUserResolvableError(resultCode)) {
+                apiAvailability.getErrorDialog(this, resultCode, PLAY_SERVICES_RESOLUTION_REQUEST)
+                        .show();
+            } else {
+                Log.i(TAG, "This device is not supported.");
+                finish();
+            }
+            return false;
+        }
+        return true;
     }
 }

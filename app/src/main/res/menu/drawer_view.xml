@@ -15,23 +15,25 @@
             android:icon="@drawable/ic_assignment_black_24dp"
             android:title="Spielpläne" />
 
+        <item
+            android:id="@+id/nav_fourth_fragment"
+            android:icon="@drawable/ic_assignment_black_24dp"
+            android:title="Gesamtspielplan" />
 
-    </group>
-
-    <group android:checkableBehavior="single">
         <item android:title="Erweitert">
             <menu>
-                <item
-                    android:id="@+id/nav_properties_fragment"
-                    android:icon="@drawable/ic_settings_black_24dp"
-                    android:title="Einstellungen" />
-                <item
-                    android:id="@+id/nav_login_fragment"
-                    android:icon="@drawable/ic_face_black_24dp"
-                    android:title="Login" />
+                <group android:checkableBehavior="single">
+                    <item
+                        android:id="@+id/nav_properties_fragment"
+                        android:icon="@drawable/ic_settings_black_24dp"
+                        android:title="Einstellungen" />
+                    <item
+                        android:id="@+id/nav_login_fragment"
+                        android:icon="@drawable/ic_face_black_24dp"
+                        android:title="Login" />
+                </group>
             </menu>
         </item>
+
     </group>
-
-
 </menu>

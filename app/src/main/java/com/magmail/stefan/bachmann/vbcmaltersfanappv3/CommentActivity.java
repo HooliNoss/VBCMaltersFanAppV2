@@ -5,15 +5,19 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.volley.Request;
@@ -23,11 +27,10 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.magmail.stefan.bachmann.vbcmaltersfanappv3.DTOs.Comment;
-import com.magmail.stefan.bachmann.vbcmaltersfanappv3.DTOs.News;
-import com.magmail.stefan.bachmann.vbcmaltersfanappv3.DTOs.Result;
-import com.magmail.stefan.bachmann.vbcmaltersfanappv3.DTOs.Team;
+import com.magmail.stefan.bachmann.vbcmaltersfanappv3.NetworkHelpers.ServerConnection;
+import com.magmail.stefan.bachmann.vbcmaltersfanappv3.NetworkHelpers.XMLParser;
+import com.magmail.stefan.bachmann.vbcmaltersfanappv3.VBCData.DataGenerator;
 
-import org.ksoap2.serialization.SoapObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -49,17 +52,37 @@ public class CommentActivity extends AppCompatActivity {
     private TextView txtTitle;
     private TextView txtDate;
     private TextView txtBody;
+    private ImageView imageViewComment;
     private int mNewsId;
+    private String mTitle;
+    private String mDate;
+    private String mBody;
+    private String mNewsTag;
     private boolean mIsAdmin;
     private boolean mIsAuthor;
 
     private FloatingActionButton mFabComment;
+    private CollapsingToolbarLayout collapsingToolbarLayout;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_comment);
+
+
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
+        //appBarLayout.setExpanded(false, false);
+
+        ViewCompat.setTransitionName(findViewById(R.id.app_bar_layout), "placeholder_thumb");
+        collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
+        collapsingToolbarLayout.setContentScrimColor(getResources().getColor(R.color.theme_color_vbc));
+        collapsingToolbarLayout.setStatusBarScrimColor(getResources().getColor(R.color.theme_color_vbc));
+        collapsingToolbarLayout.setTitle("Kommentare");
 
         mContext = this;
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view_commentActivity);
@@ -71,18 +94,25 @@ public class CommentActivity extends AppCompatActivity {
         txtTitle = (TextView) findViewById(R.id.txt_title_original_comment);
         txtDate = (TextView) findViewById(R.id.txt_date_original_comment);
         txtBody = (TextView) findViewById(R.id.txt_body_original_comment);
+        imageViewComment = (ImageView) findViewById(R.id.CommentImage);
 
         mFabComment = (FloatingActionButton) findViewById(R.id.fab_comments);
         mFabComment.setOnClickListener(fabCommentOnClickListener);
 
         mNewsId = getIntent().getIntExtra("newsId", 0);
-        String title = getIntent().getStringExtra("title");
-        String date = getIntent().getStringExtra("date");
-        String body = getIntent().getStringExtra("body");
+        mTitle = getIntent().getStringExtra("title");
+        mDate = getIntent().getStringExtra("date");
+        mBody = getIntent().getStringExtra("body");
+        mNewsTag = getIntent().getStringExtra("newsTag");
 
-        txtTitle.setText(title);
-        txtDate.setText(date);
-        txtBody.setText(body);
+        txtTitle.setText(mTitle);
+        txtDate.setText(mDate);
+        txtBody.setText(mBody);
+
+        final Context context =  imageViewComment.getContext();
+        String imageName = DataGenerator.getImageStringByNewsTag(mNewsTag);
+        int id = context.getResources().getIdentifier(imageName+MainActivity.THUMBEXTENSION, "drawable", context.getPackageName());
+        imageViewComment.setImageResource(id);
 
         checkPermissions();
 
@@ -90,10 +120,21 @@ public class CommentActivity extends AppCompatActivity {
         getComments(mNewsId);
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
     private void getComments(int newsId)
     {
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url ="http://grodien.ddns.net:8080/GetComments.php?commentID=" + Integer.toString(newsId);
+        String url = ServerConnection.SERVERURL + "GetComments.php?commentID=" + Integer.toString(newsId);
 
         progressDialog = ProgressDialog.show(this, "", "Lade Kommentare...", false, true);
 
@@ -156,14 +197,18 @@ public class CommentActivity extends AppCompatActivity {
         public void onClick(View v) {
             Intent intent = new Intent(CommentActivity.this, AddCommentActivity.class);
             intent.putExtra("newsId", mNewsId);
+            intent.putExtra("title", mTitle);
+            intent.putExtra("date", mDate);
+            intent.putExtra("body", mBody);
+            intent.putExtra("newsTag", mNewsTag);
             startActivity(intent);
         }
     };
 
     void checkPermissions()
     {
-        SharedPreferences settings = getSharedPreferences(MainActivity.PREFS_NAME, 0);
-        mIsAdmin = settings.getBoolean("IsAdmin", false);
-        mIsAuthor = settings.getBoolean("IsAuthor", false);
+        SharedPreferences settings = getSharedPreferences(AppPreferences.PREFS_NAME, 0);
+        mIsAdmin = settings.getBoolean(AppPreferences.IS_ADMIN, false);
+        mIsAuthor = settings.getBoolean(AppPreferences.IS_AUTHOR, false);
     }
 }

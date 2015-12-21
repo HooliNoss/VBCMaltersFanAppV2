@@ -16,29 +16,29 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        card_view:theme="@style/VbcMaltersTheme"
-        card_view:cardBackgroundColor="#FFCA95"
-        card_view:cardCornerRadius="4dp">
+        card_view:cardBackgroundColor="@android:color/white"
+        card_view:cardCornerRadius="4dp"
+        card_view:theme="@style/VbcMaltersTheme">
 
         <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:orientation="vertical"
-            android:paddingEnd="5dp"
-            android:paddingLeft="5dp"
-            android:paddingRight="5dp"
-            android:paddingStart="5dp">
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
             <ImageView
-                android:id="@+id/list_image"
+                android:id="@+id/imageView_news"
                 android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
+                android:layout_height="233dp"
                 android:src="@drawable/placeholder_thumb" />
 
             <TextView
                 android:id="@+id/txt_title"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
+                android:paddingEnd="5dp"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:paddingStart="5dp"
                 android:paddingTop="10dp"
                 android:textColor="@android:color/black"
                 android:textStyle="bold" />
@@ -47,6 +47,10 @@
                 android:id="@+id/txt_date_news"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:paddingEnd="5dp"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:paddingStart="5dp"
                 android:textColor="@android:color/secondary_text_dark" />
 
             <TextView
@@ -54,17 +58,43 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingBottom="5dp"
+                android:paddingEnd="5dp"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:paddingStart="5dp"
                 android:paddingTop="20dp"
                 android:textColor="@android:color/black" />
 
-            <ImageButton
-                android:id="@+id/btn_MoreContent"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
-                android:src="@drawable/ic_more_vert_black_24dp"
-                android:text="" />
+                android:gravity="end"
+                android:orientation="horizontal"
+                android:paddingEnd="5dp"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:paddingStart="5dp">
 
+                <TextView
+                    android:id="@+id/txt_comment"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="5dp"
+                    android:paddingTop="5dp"
+                    android:text="Kommentare"
+                    android:textColor="@android:color/secondary_text_dark" />
+
+                <ImageButton
+                    android:id="@+id/btn_MoreContent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:backgroundTint="@android:color/white"
+                    android:src="@drawable/ic_more_vert_black_24dp"
+                    android:text="" />
+
+            </LinearLayout>
         </LinearLayout>
     </android.support.v7.widget.CardView>
 </LinearLayout>

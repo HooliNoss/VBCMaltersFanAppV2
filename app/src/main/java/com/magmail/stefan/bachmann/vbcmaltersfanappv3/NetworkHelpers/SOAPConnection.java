@@ -1,4 +1,4 @@
-package com.magmail.stefan.bachmann.vbcmaltersfanappv3;
+package com.magmail.stefan.bachmann.vbcmaltersfanappv3.NetworkHelpers;
 
 import org.ksoap2.SoapEnvelope;
 import org.ksoap2.serialization.SoapObject;

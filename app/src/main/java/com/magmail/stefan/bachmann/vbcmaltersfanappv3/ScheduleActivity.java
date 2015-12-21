@@ -5,19 +5,30 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
+import android.widget.ImageView;
 
-import com.magmail.stefan.bachmann.vbcmaltersfanappv3.DTOs.Result;
 import com.magmail.stefan.bachmann.vbcmaltersfanappv3.DTOs.Schedule;
 import com.magmail.stefan.bachmann.vbcmaltersfanappv3.DTOs.Team;
+import com.magmail.stefan.bachmann.vbcmaltersfanappv3.NetworkHelpers.SOAPConnection;
+import com.magmail.stefan.bachmann.vbcmaltersfanappv3.VBCData.DataGenerator;
 
 import org.ksoap2.serialization.SoapObject;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 public class ScheduleActivity extends AppCompatActivity {
 
@@ -31,11 +42,40 @@ public class ScheduleActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+    private CollapsingToolbarLayout collapsingToolbarLayout;
+    private ImageView mImageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_schedule);
+
+        team = DataGenerator.getTeamById(getIntent().getIntExtra("teamId", 0));
+
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
+        //appBarLayout.setExpanded(false, false);
+
+        ViewCompat.setTransitionName(findViewById(R.id.app_bar_layout), "placeholder_thumb");
+        collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
+        collapsingToolbarLayout.setContentScrimColor(getResources().getColor(R.color.theme_color_vbc));
+        collapsingToolbarLayout.setStatusBarScrimColor(getResources().getColor(R.color.theme_color_vbc));
+
+        mImageView = (ImageView) findViewById(R.id.scheduleImage);
+
+        if (team != null) {
+            collapsingToolbarLayout.setTitle("Spielplan");
+            int id = getResources().getIdentifier(team.getM_ImgSrc()+MainActivity.THUMBEXTENSION, "drawable", getPackageName());
+            mImageView.setImageResource(id);
+        }
+        else{
+            collapsingToolbarLayout.setTitle("Die nächsten Spiele");
+            int id = getResources().getIdentifier("placeholder_thumb", "drawable", getPackageName());
+            mImageView.setImageResource(id);
+        }
 
         mContext = this;
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view_scheduleActivity);
@@ -43,9 +83,19 @@ public class ScheduleActivity extends AppCompatActivity {
 
         mLayoutManager = new LinearLayoutManager(mContext);
         mRecyclerView.setLayoutManager(mLayoutManager);
-        team = DataGenerator.getTeamById(getIntent().getIntExtra("teamId", 0));
 
         getSchedule();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     private void getSchedule()
@@ -69,7 +119,12 @@ public class ScheduleActivity extends AppCompatActivity {
                 {
                     SOAPConnection myConnection = new SOAPConnection();
 
-                    mySoapObject = myConnection.getSOAPConnection("http://myvolley.swissvolley.ch/getGamesTeam", "getGamesTeam", "team_ID", Integer.toString(team.getM_TeamId()));
+                    if (team != null) {
+                        mySoapObject = myConnection.getSOAPConnection("http://myvolley.swissvolley.ch/getGamesTeam", "getGamesTeam", "team_ID", Integer.toString(team.getM_TeamId()));
+                    }
+                    else{
+                        mySoapObject = myConnection.getSOAPConnection("http://myvolley.swissvolley.ch/getGamesByClub", "getGamesByClub", "ID_club", Integer.toString(DataGenerator.getClub().getM_ClubId()));
+                    }
                 }
                 catch (Exception e)
                 {
@@ -87,11 +142,45 @@ public class ScheduleActivity extends AppCompatActivity {
                 if (mySoapObject != null && result == 1)
                 {
                     addDataToList(mySoapObject);
-                    Schedule[] myDataset = scheduleList.toArray(new Schedule[scheduleList.size()]);
+                    Schedule[] myDataset;
+
+                    if (scheduleList.size() < 20){
+                        myDataset = scheduleList.toArray(new Schedule[scheduleList.size()]);
+                    }
+                    else {
+
+                        ArrayList<Schedule> tmpList = new ArrayList<Schedule>();
+                        for(Schedule schedule: scheduleList){
+                            String dateString = (String)schedule.getDate();
+                            String formatedDate = dateString.substring(0, 10);
+
+                            //Date now = new Date();
+                            Date now = new Date();
+                            Calendar cal = Calendar.getInstance();
+                            cal.setTime(now);
+                            cal.add(Calendar.DAY_OF_YEAR, -1); // <--
+                            Date yesterday = cal.getTime();
+                            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+                            Date convertedDate = null;
+                            try {
+                                convertedDate = dateFormat.parse(formatedDate);
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
+
+                            if (yesterday.before(convertedDate)) {
+                                tmpList.add(schedule);
+                            }
+                        }
+
+                        myDataset = tmpList.toArray(new Schedule[tmpList.size()]);
+                    }
 
                     // specify an adapter (see also next example)
                     mAdapter = new ScheduleAdapter(myDataset);
                     mRecyclerView.setAdapter(mAdapter);
+
 
                     // Listener
 //                    _mainListView.setOnItemClickListener(new OnItemClickListener() {
