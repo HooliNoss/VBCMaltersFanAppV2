@@ -8,6 +8,16 @@ import java.util.Objects;
  * Created by stefan.bachmann on 17.11.2015.
  */
 public class Result {
+    public String mRank;
+    public String mTeam;
+    public String mNumberOfGames;
+    public String mPoints;
+    public String mSetProportion;
+    public String mSetQuotient;
+    public String mPointProportion;
+    public String mPointQuotient;
+    public SoapObject mSoapObject;
+
 
     public String getmRank() {
         return mRank;
@@ -49,10 +59,35 @@ public class Result {
         this.mSoapObject = mSoapObject;
     }
 
-    public String mRank;
-    public String mTeam;
-    public String mNumberOfGames;
-    public String mPoints;
-    public SoapObject mSoapObject;
+    public String getmSetProportion() {
+        return mSetProportion;
+    }
 
+    public void setmSetProportion(String mSetProportion) {
+        this.mSetProportion = mSetProportion;
+    }
+
+    public String getmSetQuotient() {
+        return mSetQuotient;
+    }
+
+    public void setmSetQuotient(String mSetQuotient) {
+        this.mSetQuotient = mSetQuotient;
+    }
+
+    public String getmPointProportion() {
+        return mPointProportion;
+    }
+
+    public void setmPointProportion(String mPointProportion) {
+        this.mPointProportion = mPointProportion;
+    }
+
+    public String getmPointQuotient() {
+        return mPointQuotient;
+    }
+
+    public void setmPointQuotient(String mPointQuotient) {
+        this.mPointQuotient = mPointQuotient;
+    }
 }

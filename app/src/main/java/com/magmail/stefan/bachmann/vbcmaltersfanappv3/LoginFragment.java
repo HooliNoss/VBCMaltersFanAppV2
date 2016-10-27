@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -65,7 +66,7 @@ public class LoginFragment extends Fragment {
         btnSubmit = (Button) myFragmentView.findViewById(R.id.btnLoginSubmit);
 
         txtTitle.setText("Für Mitglieder vom VBC Malters:");
-        txtInfo.setText("Du willst selber News für dein Team erstellen? Das finden wir super. Die App wird dadurch noch viel lebendiger \n\n" +
+        txtInfo.setText("Du willst selber News für dein Team erstellen? Das finden wir super. Die App wird dadurch noch viel lebendiger. \n\n" +
                 "Damit dies geht musst du erstmals deine E-Mail Adresse bekannt geben." +
                 "Das ist nötig, damit die App erkennt wer du bist." +
                 "Anschliessend melde dich bei einem Admin (oder deinem Trainer) damit dir die Berechtigungen erteilt werden");
@@ -149,6 +150,11 @@ public class LoginFragment extends Fragment {
                     return params;
                 }
             };
+            stringRequest.setTag(this);
+            stringRequest.setRetryPolicy(new DefaultRetryPolicy(
+                    10000,
+                    0,
+                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
             queue.add(stringRequest);
         }
     }

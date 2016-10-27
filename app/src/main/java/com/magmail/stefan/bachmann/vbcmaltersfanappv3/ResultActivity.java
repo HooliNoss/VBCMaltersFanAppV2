@@ -33,6 +33,7 @@ public class ResultActivity extends AppCompatActivity {
     private ProgressDialog progressDialog;
     SoapObject mySoapObject;
     private Context mContext;
+    private AsyncTask mTask;
 
     private Team team;
 
@@ -89,9 +90,18 @@ public class ResultActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        if (mTask != null) {
+            mTask.cancel(true);
+        }
+
+        super.onDestroy();
+    }
+
     private void getResults()
     {
-        new AsyncTask<Integer, Integer, Integer>()
+        mTask = new AsyncTask<Integer, Integer, Integer>()
         {
             @Override
             protected void onPreExecute()
@@ -135,45 +145,6 @@ public class ResultActivity extends AppCompatActivity {
                     // specify an adapter (see also next example)
                     mAdapter = new ResultAdapter(myDataset);
                     mRecyclerView.setAdapter(mAdapter);
-
-                    // Listener
-//                    _mainListView.setOnItemClickListener(new OnItemClickListener() {
-//                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                            // Get the HashMap of the clicked item
-//                            HashMap<String, Object> user = resultList.get(position);
-//
-//                            // Get Attribute name of the HashMap
-//
-//
-//
-//                            SoapObject entry = (SoapObject)user.get("object");
-//
-//                            String teamName = (String)entry.getProperty("Caption");
-//                            String setsWon = entry.getProperty("SetsWon").toString();
-//                            String setsLost = entry.getProperty("SetsLost").toString();
-//                            String setsQuotient = entry.getProperty("SetQuotient").toString();
-//                            String ballsWon = entry.getProperty("BallsWon").toString();
-//                            String ballsLost = entry.getProperty("BallsLost").toString();
-//                            String ballsQuotient = entry.getProperty("BallsQuotient").toString();
-//
-//
-//                            // Create new Dialog
-//                            final Dialog dialog = new Dialog(ResultActivity.this);
-//                            dialog.setTitle("Detail of " + teamName);
-//                            TextView txtDescription = new TextView(ResultActivity.this);
-//                            txtDescription.setPadding(10, 0, 0, 10);
-//                            txtDescription.setText("Sätze:   " + setsWon + " : " + setsLost + " \r\n" +
-//                                            "Satzquotient:     " + setsQuotient +  "\r\n" +
-//                                            "Punkte:   " + ballsWon + " : " + ballsLost  + " \r\n" +
-//                                            "Ballquotient:     " + ballsQuotient
-//
-//                            );
-//                            dialog.setContentView(txtDescription);
-//
-//                            dialog.setCanceledOnTouchOutside(true);
-//                            dialog.show();
-//                        }
-//                    });
                 }
                 else {
                     AlertDialog.Builder b = new AlertDialog.Builder(ResultActivity.this);
@@ -210,10 +181,24 @@ public class ResultActivity extends AppCompatActivity {
                     SoapObject entry = (SoapObject)table.getProperty(i);
 
                     Result result = new Result();
-                    result.setmRank(entry.getProperty("Rank").toString());
+                    String rank = entry.getProperty("Rank").toString();
+                    if (rank.equals("&amp;nbsp;"))
+                        rank = " ";
+
+                    result.setmRank(rank);
                     result.setmTeam(entry.getProperty("Caption").toString());
                     result.setmNumberOfGames(entry.getProperty("NumberOfGames").toString());
                     result.setmPoints(entry.getProperty("Points").toString());
+
+                    String setProportion = entry.getProperty("SetsWon").toString() + " : " + entry.getProperty("SetsLost").toString();
+                    String setQuotient = entry.getProperty("SetQuotient").toString();
+                    String pointProportion = entry.getProperty("BallsWon").toString() + " : " + entry.getProperty("BallsLost").toString();
+                    String pointQuotient = entry.getProperty("BallsQuotient").toString();
+
+                    result.setmSetProportion(setProportion);
+                    result.setmSetQuotient(setQuotient);
+                    result.setmPointProportion(pointProportion);
+                    result.setmPointQuotient(pointQuotient);
                     result.setmSoapObject(entry);
 
                     resultList.add(result);

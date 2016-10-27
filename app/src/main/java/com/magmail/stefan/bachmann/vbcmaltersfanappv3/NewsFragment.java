@@ -10,12 +10,13 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -44,6 +45,7 @@ public class NewsFragment extends Fragment {
     XMLParser parser;
     private boolean mIsAdmin;
     private boolean mIsAuthor;
+    private RequestQueue mQueue;
 
     private View myFragmentView;
     private RecyclerView mRecyclerView;
@@ -91,7 +93,8 @@ public class NewsFragment extends Fragment {
         myFragmentView = inflater.inflate(R.layout.fragment_news, container, false);
         mRecyclerView = (RecyclerView) myFragmentView.findViewById(R.id.recycler_view_news);
         mRecyclerView.setHasFixedSize(true);
-        mLayoutManager = new LinearLayoutManager(getActivity());
+        //mLayoutManager = new LinearLayoutManager(getActivity());
+        mLayoutManager = new GridLayoutManager(getActivity(), 1);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
         mFabNews = (FloatingActionButton) myFragmentView.findViewById(R.id.fab_news);
@@ -130,6 +133,14 @@ public class NewsFragment extends Fragment {
         mListener = null;
     }
 
+    @Override
+    public void onStop () {
+        super.onStop();
+        if (mQueue != null) {
+            mQueue.cancelAll(this);
+        }
+    }
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -147,7 +158,7 @@ public class NewsFragment extends Fragment {
 
     private void getNews()
     {
-        RequestQueue queue = Volley.newRequestQueue(getActivity());
+        mQueue = Volley.newRequestQueue(getActivity());
         String url = ServerConnection.SERVERURL + "GetNews.php";
 
         progressDialog = ProgressDialog.show(getActivity(), "", "Lade News...", false, true);
@@ -206,9 +217,12 @@ public class NewsFragment extends Fragment {
                 b.create().show();
             }
         });
-// Add the request to the RequestQueue.
-        queue.add(stringRequest);
-
+        stringRequest.setTag(this);
+        stringRequest.setRetryPolicy(new DefaultRetryPolicy(
+                10000,
+                0,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        mQueue.add(stringRequest);
     }
 
     void checkPermissions()

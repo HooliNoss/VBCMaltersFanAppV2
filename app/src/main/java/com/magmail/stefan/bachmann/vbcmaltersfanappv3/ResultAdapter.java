@@ -1,11 +1,14 @@
 package com.magmail.stefan.bachmann.vbcmaltersfanappv3;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.magmail.stefan.bachmann.vbcmaltersfanappv3.DTOs.Result;
@@ -17,6 +20,7 @@ import org.ksoap2.serialization.SoapObject;
  */
 public class ResultAdapter extends RecyclerView.Adapter<ResultAdapter.ViewHolder> {
     private Result[] mDataset;
+    private Context mContext;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -28,6 +32,7 @@ public class ResultAdapter extends RecyclerView.Adapter<ResultAdapter.ViewHolder
         public TextView txtNumberOfGames;
         public TextView txtPoints;
         public SoapObject data;
+        public RelativeLayout layout_result;
 
         public ViewHolder(View itemLayoutView) {
             super(itemLayoutView);
@@ -35,6 +40,7 @@ public class ResultAdapter extends RecyclerView.Adapter<ResultAdapter.ViewHolder
             txtTeam = (TextView) itemLayoutView.findViewById(R.id.txt_team);
             txtNumberOfGames = (TextView) itemLayoutView.findViewById(R.id.txt_numberOfGames);
             txtPoints = (TextView) itemLayoutView.findViewById(R.id.txt_points);
+            layout_result = (RelativeLayout) itemLayoutView.findViewById(R.id.layout_result);
         }
     }
 
@@ -51,7 +57,7 @@ public class ResultAdapter extends RecyclerView.Adapter<ResultAdapter.ViewHolder
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_layout_results, parent, false);
         // set the view's size, margins, paddings and layout parameters
-
+        mContext = parent.getContext();
         v.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -70,16 +76,26 @@ public class ResultAdapter extends RecyclerView.Adapter<ResultAdapter.ViewHolder
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
 
+        final int finalPosition = position;
         holder.txtTeam.setText(mDataset[position].getmTeam());
         holder.txtNumberOfGames.setText(mDataset[position].getmNumberOfGames());
         holder.txtPoints.setText(mDataset[position].getmPoints());
         holder.txtRank.setText(mDataset[position].getmRank());
         holder.data = mDataset[position].getmSoapObject();
 
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
+        holder.layout_result.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
+                final AlertDialog dialog = new AlertDialog.Builder(mContext).create();
+                dialog.setTitle(mDataset[finalPosition].getmTeam());
+                dialog.setMessage("Satzverhältnis:  " + mDataset[finalPosition].getmSetProportion() + " \r\n" +
+                                  "Satzquotient:    " + mDataset[finalPosition].getmSetQuotient() + "\r\n" +
+                                  "Punkteverhältnis: " + mDataset[finalPosition].getmPointProportion() + "\r\n" +
+                                  "Punktequotient:   " + mDataset[finalPosition].getmPointQuotient()
+                );
+                dialog.setCanceledOnTouchOutside(true);
+                dialog.show();
             }
         });
     }

@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -185,7 +186,7 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolder> {
             holder.txtTitle.setText(mDataset[position].getTitle());
 
             Date date = fmt.parse(mDataset[position].getDate());
-            String formatedDate = fmtOut.format(date) + " " + fmTime.format(date);
+            final String formatedDate = fmtOut.format(date) + " " + fmTime.format(date);
 
             holder.txtDate.setText(formatedDate);
             holder.txtBody.setText(mDataset[position].getBody());
@@ -209,7 +210,7 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolder> {
                     Intent intent = new Intent(mContext, CommentActivity.class);
                     intent.putExtra("newsId", mDataset[position].getId());
                     intent.putExtra("title", mDataset[position].getTitle());
-                    intent.putExtra("date", mDataset[position].getDate());
+                    intent.putExtra("date", formatedDate);
                     intent.putExtra("body", mDataset[position].getBody());
                     intent.putExtra("newsTag", mDataset[position].getNewsTag());
                     mContext.startActivity(intent);
